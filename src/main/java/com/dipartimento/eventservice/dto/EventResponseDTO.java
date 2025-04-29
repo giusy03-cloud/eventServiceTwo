@@ -1,22 +1,47 @@
 package com.dipartimento.eventservice.dto;
 
 import com.dipartimento.eventservice.domain.EventStatus;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public class EventDTO {
+public class EventResponseDTO {
 
+    private Long id;
     private String name;
     private String description;
     private LocalDateTime startDate;
     private LocalDateTime endDate;
     private String location;
-    private UUID organizerId;
+    private UUID organizerId;  // Cambia da String a UUID
     private Double price;
     private Integer capacity;
     private EventStatus status;
 
-    // Getters and Setters
+    // Costruttore, getter e setter
+    public EventResponseDTO(Long id, String name, String description, LocalDateTime startDate, LocalDateTime endDate,
+                            String location, UUID organizerId, Double price, Integer capacity, EventStatus status) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.location = location;
+        this.organizerId = organizerId;
+        this.price = price;
+        this.capacity = capacity;
+        this.status = status;
+    }
+
+    // Getter e Setter
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public String getName() {
         return name;
     }

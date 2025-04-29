@@ -3,6 +3,7 @@ package com.dipartimento.eventservice.service;
 import com.dipartimento.eventservice.domain.Event;
 import com.dipartimento.eventservice.domain.EventStatus;
 import com.dipartimento.eventservice.dto.EventDTO;
+import com.dipartimento.eventservice.dto.EventResponseDTO;
 import com.dipartimento.eventservice.repository.EventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,39 +18,68 @@ public class EventService {
     @Autowired
     private EventRepository eventRepository;
 
-    // Crea un nuovo evento
-    @Transactional
-    public Event createEvent(EventDTO eventDTO) {
+    // Metodo per mappare un EventDTO in un Event
+    private Event mapToEntity(EventDTO eventDTO) {
         Event event = new Event();
         event.setName(eventDTO.getName());
         event.setDescription(eventDTO.getDescription());
         event.setStartDate(eventDTO.getStartDate());
         event.setEndDate(eventDTO.getEndDate());
         event.setLocation(eventDTO.getLocation());
+        event.setOrganizerId(eventDTO.getOrganizerId());
         event.setPrice(eventDTO.getPrice());
         event.setCapacity(eventDTO.getCapacity());
-        event.setStatus(EventStatus.ACTIVE);
+        event.setStatus(eventDTO.getStatus());
+        return event;
+    }
 
-        return eventRepository.save(event);
+    // Metodo per mappare un Event in un EventResponseDTO
+    private EventResponseDTO mapToDTO(Event event) {
+        return new EventResponseDTO(
+                event.getId(),
+                event.getName(),
+                event.getDescription(),
+                event.getStartDate(),
+                event.getEndDate(),
+                event.getLocation(),
+                event.getOrganizerId(),
+                event.getPrice(),
+                event.getCapacity(),
+                event.getStatus()
+        );
+    }
+
+    // Crea un nuovo evento e restituisci il DTO di risposta
+    @Transactional
+    public EventResponseDTO createEvent(EventDTO eventDTO) {
+        Event event = mapToEntity(eventDTO);
+        event.setStatus(EventStatus.ACTIVE); // Imposta lo stato come "ACTIVE" di default
+        event = eventRepository.save(event);
+
+        return mapToDTO(event); // Restituisce il DTO di risposta
     }
 
     // Modifica un evento esistente
     @Transactional
-    public Event updateEvent(Long id, EventDTO eventDTO) {
+    public EventResponseDTO updateEvent(Long id, EventDTO eventDTO) {
         Optional<Event> optionalEvent = eventRepository.findById(id);
         if (optionalEvent.isPresent()) {
-            Event event = optionalEvent.get();
-            event.setName(eventDTO.getName());
-            event.setDescription(eventDTO.getDescription());
-            event.setStartDate(eventDTO.getStartDate());
-            event.setEndDate(eventDTO.getEndDate());
-            event.setLocation(eventDTO.getLocation());
-            event.setPrice(eventDTO.getPrice());
-            event.setCapacity(eventDTO.getCapacity());
-            event.setStatus(eventDTO.getStatus());
-            return eventRepository.save(event);
+            Event existingEvent = optionalEvent.get();
+            // Mappa i dati dal DTO all'oggetto esistente
+            existingEvent.setName(eventDTO.getName());
+            existingEvent.setDescription(eventDTO.getDescription());
+            existingEvent.setStartDate(eventDTO.getStartDate());
+            existingEvent.setEndDate(eventDTO.getEndDate());
+            existingEvent.setLocation(eventDTO.getLocation());
+            existingEvent.setOrganizerId(eventDTO.getOrganizerId());
+            existingEvent.setPrice(eventDTO.getPrice());
+            existingEvent.setCapacity(eventDTO.getCapacity());
+            existingEvent.setStatus(eventDTO.getStatus());
+            eventRepository.save(existingEvent);
+
+            return mapToDTO(existingEvent); // Restituisce il DTO aggiornato
         }
-        return null; // O lancia una RuntimeException
+        return null;
     }
 
     // Elimina un evento
@@ -59,12 +89,16 @@ public class EventService {
     }
 
     // Recupera un evento per ID
-    public Event getEventById(Long id) {
-        return eventRepository.findById(id).orElse(null);
+    public EventResponseDTO getEventById(Long id) {
+        Event event = eventRepository.findById(id).orElse(null);
+        return event != null ? mapToDTO(event) : null;
     }
 
     // Recupera tutti gli eventi
-    public List<Event> getAllEvents() {
-        return eventRepository.findAll();
+    public List<EventResponseDTO> getAllEvents() {
+        List<Event> events = eventRepository.findAll();
+        return events.stream()
+                .map(this::mapToDTO)
+                .toList(); // Restituisce una lista di DTO
     }
 }

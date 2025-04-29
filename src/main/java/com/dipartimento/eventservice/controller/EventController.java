@@ -1,11 +1,11 @@
 package com.dipartimento.eventservice.controller;
 
-
-import com.dipartimento.eventservice.domain.Event;
 import com.dipartimento.eventservice.dto.EventDTO;
+import com.dipartimento.eventservice.dto.EventResponseDTO;
 import com.dipartimento.eventservice.service.EventService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,15 +17,21 @@ public class EventController {
     @Autowired
     private EventService eventService;
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public Event createEvent(@RequestBody EventDTO eventDTO) {
-        return eventService.createEvent(eventDTO);
+
+    @PostMapping("/create")  // Specifica l'endpoint per la creazione dell'evento
+    public ResponseEntity<EventResponseDTO> createEvent(@RequestBody EventDTO eventDTO) {
+        EventResponseDTO eventResponse = eventService.createEvent(eventDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(eventResponse);
     }
 
+
     @PutMapping("/{id}")
-    public Event updateEvent(@PathVariable Long id, @RequestBody EventDTO eventDTO) {
-        return eventService.updateEvent(id, eventDTO);
+    public ResponseEntity<EventResponseDTO> updateEvent(@PathVariable Long id, @RequestBody EventDTO eventDTO) {
+        EventResponseDTO updatedEvent = eventService.updateEvent(id, eventDTO);
+        if (updatedEvent != null) {
+            return ResponseEntity.ok(updatedEvent);
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
 
     @DeleteMapping("/{id}")
@@ -35,14 +41,16 @@ public class EventController {
     }
 
     @GetMapping("/{id}")
-    public Event getEvent(@PathVariable Long id) {
-        return eventService.getEventById(id);
+    public ResponseEntity<EventResponseDTO> getEvent(@PathVariable Long id) {
+        EventResponseDTO eventResponse = eventService.getEventById(id);
+        if (eventResponse != null) {
+            return ResponseEntity.ok(eventResponse);
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
 
     @GetMapping
-    public List<Event> getAllEvents() {
+    public List<EventResponseDTO> getAllEvents() {
         return eventService.getAllEvents();
     }
-
-
 }
