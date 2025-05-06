@@ -1,22 +1,28 @@
 package com.dipartimento.eventservice.dto;
 
-import com.dipartimento.eventservice.domain.EventStatus;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public class EventDTO {
-
+public class EventResponse {
+    private Long id;
     private String name;
     private String description;
     private LocalDateTime startDate;
     private LocalDateTime endDate;
     private String location;
+    private UUID organizerId;
     private Double price;
     private Integer capacity;
-    private EventStatus status;
-    private UUID organizerId;
+    private String status;
 
-    // Getters and Setters
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public String getName() {
         return name;
     }
@@ -57,6 +63,13 @@ public class EventDTO {
         this.location = location;
     }
 
+    public UUID getOrganizerId() {
+        return organizerId;
+    }
+
+    public void setOrganizerId(UUID organizerId) {
+        this.organizerId = organizerId;
+    }
 
     public Double getPrice() {
         return price;
@@ -74,19 +87,11 @@ public class EventDTO {
         this.capacity = capacity;
     }
 
-    public EventStatus getStatus() {
+    public String getStatus() {
         return status;
     }
 
-    public void setStatus(EventStatus status) {
+    public void setStatus(String status) {
         this.status = status;
-    }
-
-    public UUID getOrganizerId() {
-        return organizerId;
-    }
-
-    public void setOrganizerId(UUID organizerId) {
-        this.organizerId = organizerId;
     }
 }
