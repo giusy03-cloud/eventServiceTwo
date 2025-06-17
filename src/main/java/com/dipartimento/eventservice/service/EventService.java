@@ -27,9 +27,15 @@ public class EventService {
         return eventRepository.findById(id);
     }
 
-    public void deleteEvent(Long id) {
-        eventRepository.deleteById(id);
+    public boolean deleteEvent(Long id) {
+        if (eventRepository.existsById(id)) {
+            eventRepository.deleteById(id);
+            return true;
+        } else {
+            return false;
+        }
     }
+
 
     public void updateEvent(Event event) {
         eventRepository.save(event);  // Usa il metodo save per aggiornare l'evento
@@ -52,6 +58,14 @@ public class EventService {
         } else {
             throw new IllegalArgumentException("Evento con ID " + id + " non trovato.");
         }
+    }
+
+    public List<Event> getEventsByName(String name){
+        return eventRepository.findByNameContainingIgnoreCase(name);
+    }
+
+    public List<Event> getEventsByLocation(String location){
+        return eventRepository.findByLocationContainingIgnoreCase(location);
     }
 
 

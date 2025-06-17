@@ -7,7 +7,7 @@ services:
     depends_on:
       - event-db
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://event-db:5433/eventService
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://event-db:5432/eventService
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=root
       - SPRING_SECURITY_USER_NAME=admin
@@ -23,7 +23,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: root
     ports:
-      - "5433:5433"
+      - "5433:5432"
     volumes:
       - eventService-data:/var/lib/postgresql/data
     networks:
