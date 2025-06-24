@@ -4,6 +4,8 @@ import com.dipartimento.eventservice.domain.Event;
 import com.dipartimento.eventservice.domain.EventStatus;
 import com.dipartimento.eventservice.repository.EventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -66,6 +68,10 @@ public class EventService {
 
     public List<Event> getEventsByLocation(String location){
         return eventRepository.findByLocationContainingIgnoreCase(location);
+    }
+
+    public Page<Event> getEventsPaginated(Pageable pageable){
+        return eventRepository.findAll(pageable);
     }
 
 

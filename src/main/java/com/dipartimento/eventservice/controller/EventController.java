@@ -8,6 +8,9 @@ import com.dipartimento.eventservice.mapper.EventMapper;
 import com.dipartimento.eventservice.service.EventService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -35,6 +38,21 @@ public class EventController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ResponseMessage("Errore durante la creazione dell'evento."));
         }
+    }
+
+    @GetMapping("/paged")
+    public ResponseEntity<List<EventResponseDTO>> getPaginatedEvents(
+            @RequestParam(defaultValue ="0") int page,
+            @RequestParam(defaultValue = "100") int size
+    ){
+        Pageable pageable = PageRequest.of(page,size);
+        Page<Event> eventsPage=eventService.getEventsPaginated(pageable);
+
+        List<EventResponseDTO> response=eventsPage.getContent().stream()
+                .map(EventMapper::toResponseDTO)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(response);
     }
 
     // READ ALL
