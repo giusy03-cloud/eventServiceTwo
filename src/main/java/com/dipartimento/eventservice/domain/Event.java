@@ -34,7 +34,7 @@ public class Event {
     private String location;
 
     @Column(name = "organizer_id", nullable = false)  // Cambia solo l'ID dell'organizzatore
-    private UUID organizerId;  // Usando UUID per l'ID dell'organizzatore
+    private Long organizerId;  // Usando UUID per l'ID dell'organizzatore
 
 
     @Column(name = "price")
@@ -99,11 +99,11 @@ public class Event {
         this.location = location;
     }
 
-    public UUID getOrganizerId() {
+    public Long getOrganizerId() {
         return organizerId;
     }
 
-    public void setOrganizerId(UUID organizerId) {
+    public void setOrganizerId(Long organizerId) {
         this.organizerId = organizerId;
     }
 

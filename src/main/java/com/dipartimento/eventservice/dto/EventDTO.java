@@ -14,7 +14,7 @@ public class EventDTO {
     private Double price;
     private Integer capacity;
     private EventStatus status;
-    private UUID organizerId;
+    private Long organizerId;
 
     // Getters and Setters
     public String getName() {
@@ -82,11 +82,11 @@ public class EventDTO {
         this.status = status;
     }
 
-    public UUID getOrganizerId() {
+    public Long getOrganizerId() {
         return organizerId;
     }
 
-    public void setOrganizerId(UUID organizerId) {
+    public void setOrganizerId(Long organizerId) {
         this.organizerId = organizerId;
     }
 }

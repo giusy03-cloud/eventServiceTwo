@@ -9,7 +9,7 @@ public class EventRequest {
     private LocalDateTime startDate;
     private LocalDateTime endDate;
     private String location;
-    private UUID organizerId;
+    private Long organizerId;
     private Double price;
     private Integer capacity;
     private String status; // oppure EventStatus
@@ -55,11 +55,11 @@ public class EventRequest {
         this.location = location;
     }
 
-    public UUID getOrganizerId() {
+    public Long getOrganizerId() {
         return organizerId;
     }
 
-    public void setOrganizerId(UUID organizerId) {
+    public void setOrganizerId(Long organizerId) {
         this.organizerId = organizerId;
     }
 

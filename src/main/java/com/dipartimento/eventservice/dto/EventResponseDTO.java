@@ -3,7 +3,7 @@ package com.dipartimento.eventservice.dto;
 import com.dipartimento.eventservice.domain.EventStatus;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
+
 
 public class EventResponseDTO {
 
@@ -13,14 +13,14 @@ public class EventResponseDTO {
     private LocalDateTime startDate;
     private LocalDateTime endDate;
     private String location;
-    private UUID organizerId;  // Cambia da String a UUID
+    private Long organizerId;  // Cambia da String a UUID
     private Double price;
     private Integer capacity;
     private EventStatus status;
 
     // Costruttore, getter e setter
     public EventResponseDTO(Long id, String name, String description, LocalDateTime startDate, LocalDateTime endDate,
-                            String location, UUID organizerId, Double price, Integer capacity, EventStatus status) {
+                            String location, Long organizerId, Double price, Integer capacity, EventStatus status) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -82,11 +82,11 @@ public class EventResponseDTO {
         this.location = location;
     }
 
-    public UUID getOrganizerId() {
+    public Long getOrganizerId() {
         return organizerId;
     }
 
-    public void setOrganizerId(UUID organizerId) {
+    public void setOrganizerId(Long organizerId) {
         this.organizerId = organizerId;
     }
 

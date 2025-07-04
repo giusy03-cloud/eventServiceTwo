@@ -27,23 +27,30 @@ public class EventController {
     @Autowired
     private EventService eventService;
 
-    // CREATE
     @PostMapping("/create")
     @PreAuthorize("hasRole('ORGANIZER')")
-    public ResponseEntity<ResponseMessage> createEvent(@RequestBody EventRequest eventRequest) {
+    public ResponseEntity<ResponseMessage> createEvent(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @RequestBody EventRequest eventRequest) {
+
         try {
+            String token = authorizationHeader.replace("Bearer ", "");
             Event event = EventMapper.toEntity(eventRequest);
-            eventService.createEvent(event);
+            eventService.createEvent(event, token);  // Passo anche il token qui
             return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseMessage("Evento creato con successo."));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ResponseMessage("Errore durante la creazione dell'evento."));
+            e.printStackTrace();  // per debug
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ResponseMessage("Errore durante la creazione dell'evento."));
         }
     }
+
+
 
     @GetMapping("/paged")
     public ResponseEntity<List<EventResponseDTO>> getPaginatedEvents(
             @RequestParam(defaultValue ="0") int page,
-            @RequestParam(defaultValue = "100") int size
+            @RequestParam(defaultValue = "10") int size
     ){
         Pageable pageable = PageRequest.of(page,size);
         Page<Event> eventsPage=eventService.getEventsPaginated(pageable);
@@ -57,6 +64,7 @@ public class EventController {
 
     // READ ALL
     @GetMapping("/all")
+    @PreAuthorize("hasRole('PARTICIPANT') or hasRole('ORGANIZER')")
     public ResponseEntity<List<EventResponseDTO>> getAllEvents() {
         List<Event> events = eventService.getAllEvents();
         List<EventResponseDTO> response = events.stream()
@@ -65,39 +73,84 @@ public class EventController {
         return ResponseEntity.ok(response);
     }
 
+
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ORGANIZER')")
     public ResponseEntity<EventResponseDTO> getEventById(@PathVariable Long id) {
         Optional<Event> event = eventService.getEventById(id);
         return event.map(value -> ResponseEntity.ok(EventMapper.toResponseDTO(value)))
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
+    // Endpoint pubblico per controllo esistenza evento da altri microservizi
+    @GetMapping("/public/{id}")
+    public ResponseEntity<String> publicCheckEventExists(@PathVariable Long id) {
+        Optional<Event> event = eventService.getEventById(id);
+        if (event.isPresent()) {
+            return ResponseEntity.ok("Esiste");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Evento non trovato");
+        }
+    }
+
+
 
     @PutMapping("/update/{id}")
     @PreAuthorize("hasRole('ORGANIZER')")
-    public ResponseEntity<ResponseMessage> updateEvent(@PathVariable Long id, @RequestBody EventRequest eventRequest) {
+    public ResponseEntity<ResponseMessage> updateEvent(
+            @PathVariable Long id,
+            @RequestBody EventRequest eventRequest,
+            @RequestHeader("Authorization") String authorizationHeader
+    ) {
+        String token = authorizationHeader.replace("Bearer ", "");
+
         Optional<Event> existingEvent = eventService.getEventById(id);
-        if (existingEvent.isPresent()) {
-            Event eventToUpdate = EventMapper.toEntity(eventRequest);
-            eventToUpdate.setId(id);
-            eventService.updateEvent(eventToUpdate);  // CORRETTO: solo un parametro
-            return ResponseEntity.ok(new ResponseMessage("Evento aggiornato con successo."));
-        } else {
+        if (existingEvent.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseMessage("Evento con ID " + id + " non trovato."));
         }
+
+        Event event = existingEvent.get();
+
+        // Verifica che l'utente sia il proprietario e abbia ruolo ORGANIZER
+        if (!eventService.checkOrganizerExists(event.getOrganizerId(), token)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ResponseMessage("Non sei autorizzato ad aggiornare questo evento."));
+        }
+
+        // Prosegui con l'aggiornamento
+        Event eventToUpdate = EventMapper.toEntity(eventRequest);
+        eventToUpdate.setId(id);
+        eventService.updateEvent(eventToUpdate);
+
+        return ResponseEntity.ok(new ResponseMessage("Evento aggiornato con successo."));
     }
 
 
     @DeleteMapping("/delete/{id}")
-    @PreAuthorize("hasRole('ORGANIZER')")
-    public ResponseEntity<ResponseMessage> deleteEvent(@PathVariable Long id) {
-        boolean deleted = eventService.deleteEvent(id);  // ORA RITORNA UN BOOLEAN
-        if (deleted) {
-            return ResponseEntity.ok(new ResponseMessage("Evento eliminato con successo."));
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseMessage("Evento con ID " + id + " non trovato."));
+    public ResponseEntity<ResponseMessage> deleteEvent(@PathVariable Long id,
+                                                       @RequestHeader("Authorization") String authHeader) {
+        System.out.println("DELETE /events/delete/" + id + " chiamato");  // Controllo semplice
+        String token = authHeader.replace("Bearer ", "");
+        try {
+            boolean deleted = eventService.deleteEvent(id, token);
+            if (deleted) {
+                return ResponseEntity.ok(new ResponseMessage("Evento eliminato con successo."));
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(new ResponseMessage("Evento con ID " + id + " non trovato."));
+            }
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(new ResponseMessage(e.getMessage()));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ResponseMessage("Errore durante l'eliminazione dell'evento."));
         }
     }
+
+
+
+
 
 
     // SEARCH BY NAME
