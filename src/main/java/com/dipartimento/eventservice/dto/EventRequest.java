@@ -3,16 +3,40 @@ package com.dipartimento.eventservice.dto;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import jakarta.validation.constraints.*;
+import java.time.LocalDateTime;
+
 public class EventRequest {
+
+    @NotBlank(message = "Il nome è obbligatorio")
+    @Size(max = 255, message = "Il nome non può superare 255 caratteri")
     private String name;
+
+    @Size(max = 1000, message = "La descrizione non può superare 1000 caratteri")
     private String description;
+
+    @NotNull(message = "La data di inizio è obbligatoria")
     private LocalDateTime startDate;
+
+    @NotNull(message = "La data di fine è obbligatoria")
     private LocalDateTime endDate;
+
+    @NotBlank(message = "La location è obbligatoria")
+    @Size(max = 255, message = "La location non può superare 255 caratteri")
     private String location;
+
+    @NotNull(message = "L'organizerId è obbligatorio")
     private Long organizerId;
+
+    @PositiveOrZero(message = "Il prezzo deve essere positivo o zero")
     private Double price;
+
+    @Positive(message = "La capacità deve essere un numero positivo")
     private Integer capacity;
-    private String status; // oppure EventStatus
+
+    @NotBlank(message = "Lo status è obbligatorio")
+    private String status; // oppure meglio usare enum EventStatus se possibile
+
 
 
     public String getName() {

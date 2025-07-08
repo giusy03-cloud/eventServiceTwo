@@ -4,6 +4,8 @@ import com.dipartimento.eventservice.domain.Event;
 import com.dipartimento.eventservice.domain.EventStatus;
 import com.dipartimento.eventservice.dto.UsersAccounts;
 import com.dipartimento.eventservice.repository.EventRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,11 +22,14 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.http.HttpStatus;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class EventService {
+
+    private static final Logger logger = LoggerFactory.getLogger(EventService.class);
 
     @Autowired
     private EventRepository eventRepository;
@@ -69,12 +74,26 @@ public class EventService {
     }
 
 
+
+
     public void createEvent(Event event, String token) {
+        logger.info("Richiesta creazione evento da parte dell'utente con token: {}", token);
+
         if (!checkOrganizerExists(event.getOrganizerId(), token)) {
+            logger.warn("Organizzatore NON autorizzato: id={}", event.getOrganizerId());
             throw new IllegalArgumentException("Organizzatore con ID " + event.getOrganizerId() + " non trovato o non autorizzato.");
         }
+
+        LocalDateTime now = LocalDateTime.now();
+        event.setCreatedAt(now);
+        event.setUpdatedAt(now);
+        event.setCreatedBy(event.getOrganizerId());
+        event.setUpdatedBy(event.getOrganizerId());
+
+        logger.info("Salvataggio evento: {}", event.getName());
         eventRepository.save(event);
     }
+
 
 
     public List<Event> getAllEvents() {
@@ -86,47 +105,53 @@ public class EventService {
     }
 
 
+
     public boolean deleteEvent(Long id, String token) {
+        logger.info("Richiesta eliminazione evento ID={} da parte di token={}", id, token);
+
         Optional<Event> eventOpt = eventRepository.findById(id);
         if (eventOpt.isEmpty()) {
+            logger.warn("Evento non trovato per eliminazione: ID={}", id);
             return false;
         }
+
         Event event = eventOpt.get();
 
         if (!checkOrganizerExists(event.getOrganizerId(), token)) {
-            System.out.println("Utente non autorizzato a cancellare evento con id " + id);
+            logger.warn("Utente non autorizzato ad eliminare l'evento ID={}", id);
             throw new IllegalArgumentException("Non sei autorizzato a eliminare l'evento.");
         }
 
         eventRepository.delete(event);
+        logger.info("Evento eliminato con successo: ID={}", id);
         return true;
     }
 
 
 
 
+
+
     public void updateEvent(Event event) {
-        eventRepository.save(event);  // Usa il metodo save per aggiornare l'evento
-    }
+        logger.info("Richiesta aggiornamento evento con ID: {}", event.getId());
 
-    public void updateEventStatus(Long id, EventStatus status) {
-        Optional<Event> eventOptional = eventRepository.findById(id);
-
-        if (eventOptional.isPresent()) {
-            Event event = eventOptional.get();
-
-            // Verifica se lo stato corrente dell'evento impedisce aggiornamenti
-            if (event.getStatus() == EventStatus.COMPLETED || event.getStatus() == EventStatus.CANCELLED) {
-                throw new IllegalStateException("Non è possibile cambiare lo stato di un evento completato o cancellato.");
-            }
-
-            // Impostazione del nuovo stato
-            event.setStatus(status);
-            eventRepository.save(event);  // Salviamo l'evento aggiornato nel database
-        } else {
-            throw new IllegalArgumentException("Evento con ID " + id + " non trovato.");
+        Optional<Event> existingEventOpt = eventRepository.findById(event.getId());
+        if (existingEventOpt.isEmpty()) {
+            logger.error("Evento non trovato per aggiornamento: ID={}", event.getId());
+            throw new IllegalArgumentException("Evento con ID " + event.getId() + " non trovato.");
         }
+
+        Event existingEvent = existingEventOpt.get();
+
+        event.setCreatedAt(existingEvent.getCreatedAt());
+        event.setCreatedBy(existingEvent.getCreatedBy());
+        event.setUpdatedAt(LocalDateTime.now());
+        event.setUpdatedBy(existingEvent.getOrganizerId());
+
+        logger.info("Evento aggiornato: ID={}, nome={}", event.getId(), event.getName());
+        eventRepository.save(event);
     }
+
 
     public List<Event> getEventsByName(String name){
         return eventRepository.findByNameContainingIgnoreCase(name);

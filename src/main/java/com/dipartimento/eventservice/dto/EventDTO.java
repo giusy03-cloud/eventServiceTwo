@@ -16,6 +16,8 @@ public class EventDTO {
     private EventStatus status;
     private Long organizerId;
 
+
+
     // Getters and Setters
     public String getName() {
         return name;

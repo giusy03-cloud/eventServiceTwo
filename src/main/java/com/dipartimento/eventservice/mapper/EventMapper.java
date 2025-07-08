@@ -32,7 +32,12 @@ public class EventMapper {
                 event.getOrganizerId(),
                 event.getPrice(),
                 event.getCapacity(),
-                event.getStatus()
+                event.getStatus(),
+                event.getCreatedAt(),  // ➕ aggiunto
+                event.getCreatedBy(),
+                event.getUpdatedAt(),
+                event.getUpdatedBy()
         );
     }
+
 }

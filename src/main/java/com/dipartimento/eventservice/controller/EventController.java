@@ -7,6 +7,7 @@ import com.dipartimento.eventservice.dto.ResponseMessage;
 import com.dipartimento.eventservice.mapper.EventMapper;
 import com.dipartimento.eventservice.service.EventService;
 
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -14,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -31,15 +33,24 @@ public class EventController {
     @PreAuthorize("hasRole('ORGANIZER')")
     public ResponseEntity<ResponseMessage> createEvent(
             @RequestHeader("Authorization") String authorizationHeader,
-            @RequestBody EventRequest eventRequest) {
+            @Valid @RequestBody EventRequest eventRequest,
+            BindingResult bindingResult) {
+
+        if (bindingResult.hasErrors()) {
+            List<String> errors = bindingResult.getAllErrors().stream()
+                    .map(error -> error.getDefaultMessage())
+                    .collect(Collectors.toList());
+            return ResponseEntity.badRequest()
+                    .body(new ResponseMessage("Errore di validazione: " + String.join(", ", errors)));
+        }
 
         try {
             String token = authorizationHeader.replace("Bearer ", "");
             Event event = EventMapper.toEntity(eventRequest);
-            eventService.createEvent(event, token);  // Passo anche il token qui
+            eventService.createEvent(event, token);
             return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseMessage("Evento creato con successo."));
         } catch (Exception e) {
-            e.printStackTrace();  // per debug
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ResponseMessage("Errore durante la creazione dell'evento."));
         }
@@ -95,34 +106,52 @@ public class EventController {
 
 
 
+
     @PutMapping("/update/{id}")
     @PreAuthorize("hasRole('ORGANIZER')")
     public ResponseEntity<ResponseMessage> updateEvent(
             @PathVariable Long id,
-            @RequestBody EventRequest eventRequest,
+            @Valid @RequestBody EventRequest eventRequest,
+            BindingResult bindingResult,
             @RequestHeader("Authorization") String authorizationHeader
     ) {
+        if (bindingResult.hasErrors()) {
+            List<String> errors = bindingResult.getAllErrors().stream()
+                    .map(error -> error.getDefaultMessage())
+                    .collect(Collectors.toList());
+            return ResponseEntity.badRequest()
+                    .body(new ResponseMessage("Errore di validazione: " + String.join(", ", errors)));
+        }
+
         String token = authorizationHeader.replace("Bearer ", "");
 
         Optional<Event> existingEvent = eventService.getEventById(id);
         if (existingEvent.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseMessage("Evento con ID " + id + " non trovato."));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ResponseMessage("Evento con ID " + id + " non trovato."));
         }
 
         Event event = existingEvent.get();
 
         // Verifica che l'utente sia il proprietario e abbia ruolo ORGANIZER
         if (!eventService.checkOrganizerExists(event.getOrganizerId(), token)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ResponseMessage("Non sei autorizzato ad aggiornare questo evento."));
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(new ResponseMessage("Non sei autorizzato ad aggiornare questo evento."));
         }
 
         // Prosegui con l'aggiornamento
         Event eventToUpdate = EventMapper.toEntity(eventRequest);
         eventToUpdate.setId(id);
+
+        // Mantieni i dati di creazione originali
+        eventToUpdate.setCreatedAt(event.getCreatedAt());
+        eventToUpdate.setCreatedBy(event.getCreatedBy());
+
         eventService.updateEvent(eventToUpdate);
 
         return ResponseEntity.ok(new ResponseMessage("Evento aggiornato con successo."));
     }
+
 
 
     @DeleteMapping("/delete/{id}")

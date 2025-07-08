@@ -18,9 +18,17 @@ public class EventResponseDTO {
     private Integer capacity;
     private EventStatus status;
 
-    // Costruttore, getter e setter
+    // 🔽 Campi di audit logging
+    private LocalDateTime createdAt;
+    private Long createdBy;
+    private LocalDateTime updatedAt;
+    private Long updatedBy;
+
+
+    // Costruttore completo (aggiungilo o aggiornalo)
     public EventResponseDTO(Long id, String name, String description, LocalDateTime startDate, LocalDateTime endDate,
-                            String location, Long organizerId, Double price, Integer capacity, EventStatus status) {
+                            String location, Long organizerId, Double price, Integer capacity, EventStatus status,
+                            LocalDateTime createdAt, Long createdBy, LocalDateTime updatedAt, Long updatedBy) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -31,6 +39,10 @@ public class EventResponseDTO {
         this.price = price;
         this.capacity = capacity;
         this.status = status;
+        this.createdAt = createdAt;
+        this.createdBy = createdBy;
+        this.updatedAt = updatedAt;
+        this.updatedBy = updatedBy;
     }
 
     // Getter e Setter
@@ -112,5 +124,37 @@ public class EventResponseDTO {
 
     public void setStatus(EventStatus status) {
         this.status = status;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public Long getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(Long createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public Long getUpdatedBy() {
+        return updatedBy;
+    }
+
+    public void setUpdatedBy(Long updatedBy) {
+        this.updatedBy = updatedBy;
     }
 }
