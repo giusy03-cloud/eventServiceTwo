@@ -18,9 +18,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -60,25 +58,20 @@ public class EventController {
 
 
 
-
     @GetMapping("/paged")
-    public ResponseEntity<Map<String, Object>> getPaginatedEvents(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Event> eventsPage = eventService.getEventsPaginated(pageable);
+    public ResponseEntity<List<EventResponseDTO>> getPaginatedEvents(
+            @RequestParam(defaultValue ="0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ){
+        Pageable pageable = PageRequest.of(page,size);
+        Page<Event> eventsPage=eventService.getEventsPaginated(pageable);
 
-        List<EventResponseDTO> events = eventsPage.getContent().stream()
+        List<EventResponseDTO> response=eventsPage.getContent().stream()
                 .map(EventMapper::toResponseDTO)
                 .collect(Collectors.toList());
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("content", events);
-        response.put("totalElements", eventsPage.getTotalElements());
-
         return ResponseEntity.ok(response);
     }
-
 
     // READ ALL
     @GetMapping("/all")
@@ -110,7 +103,6 @@ public class EventController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Evento non trovato");
         }
     }
-
 
 
 
@@ -160,7 +152,6 @@ public class EventController {
     }
 
 
-
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<ResponseMessage> deleteEvent(@PathVariable Long id,
                                                        @RequestHeader("Authorization") String authHeader) {
@@ -190,52 +181,34 @@ public class EventController {
 
 
     // SEARCH BY NAME
-
-
     @GetMapping("/search/byName")
-    public ResponseEntity<Map<String, Object>> getEventsByNamePaged(
+    public ResponseEntity<List<EventResponseDTO>> getEventsByName(
             @RequestParam String name,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-
+            @RequestParam(defaultValue = "10") int size
+    ) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Event> eventsPage = eventService.getEventsByName(name, pageable);
+        Page<Event> events = eventService.getEventsByName(name, pageable);
 
-        List<EventResponseDTO> events = eventsPage.getContent().stream()
+        List<EventResponseDTO> response = events.getContent().stream()
                 .map(EventMapper::toResponseDTO)
                 .collect(Collectors.toList());
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("content", events);
-        response.put("totalElements", eventsPage.getTotalElements());
-
         return ResponseEntity.ok(response);
     }
-
-
-
     // SEARCH BY LOCATION
 
-
     @GetMapping("/search/byLocation")
-    public ResponseEntity<Map<String, Object>> getEventsByLocationPaged(
+    public ResponseEntity<List<EventResponseDTO>> getEventsByLocation(
             @RequestParam String location,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-
+            @RequestParam(defaultValue = "10") int size
+    ) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Event> eventsPage = eventService.getEventsByLocation(location, pageable);
+        Page<Event> events = eventService.getEventsByLocation(location, pageable);
 
-        List<EventResponseDTO> events = eventsPage.getContent().stream()
+        List<EventResponseDTO> response = events.getContent().stream()
                 .map(EventMapper::toResponseDTO)
                 .collect(Collectors.toList());
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("content", events);
-        response.put("totalElements", eventsPage.getTotalElements());
-
         return ResponseEntity.ok(response);
     }
-
-
 }
