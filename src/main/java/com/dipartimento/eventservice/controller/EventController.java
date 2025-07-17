@@ -18,7 +18,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -58,20 +60,25 @@ public class EventController {
 
 
 
-    @GetMapping("/paged")
-    public ResponseEntity<List<EventResponseDTO>> getPaginatedEvents(
-            @RequestParam(defaultValue ="0") int page,
-            @RequestParam(defaultValue = "10") int size
-    ){
-        Pageable pageable = PageRequest.of(page,size);
-        Page<Event> eventsPage=eventService.getEventsPaginated(pageable);
 
-        List<EventResponseDTO> response=eventsPage.getContent().stream()
+    @GetMapping("/paged")
+    public ResponseEntity<Map<String, Object>> getPaginatedEvents(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Event> eventsPage = eventService.getEventsPaginated(pageable);
+
+        List<EventResponseDTO> events = eventsPage.getContent().stream()
                 .map(EventMapper::toResponseDTO)
                 .collect(Collectors.toList());
 
+        Map<String, Object> response = new HashMap<>();
+        response.put("content", events);
+        response.put("totalElements", eventsPage.getTotalElements());
+
         return ResponseEntity.ok(response);
     }
+
 
     // READ ALL
     @GetMapping("/all")
@@ -183,22 +190,52 @@ public class EventController {
 
 
     // SEARCH BY NAME
+
+
     @GetMapping("/search/byName")
-    public ResponseEntity<List<EventResponseDTO>> getEventsByName(@RequestParam String name) {
-        List<Event> events = eventService.getEventsByName(name);
-        List<EventResponseDTO> response = events.stream()
+    public ResponseEntity<Map<String, Object>> getEventsByNamePaged(
+            @RequestParam String name,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Event> eventsPage = eventService.getEventsByName(name, pageable);
+
+        List<EventResponseDTO> events = eventsPage.getContent().stream()
                 .map(EventMapper::toResponseDTO)
                 .collect(Collectors.toList());
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("content", events);
+        response.put("totalElements", eventsPage.getTotalElements());
+
         return ResponseEntity.ok(response);
     }
 
+
+
     // SEARCH BY LOCATION
+
+
     @GetMapping("/search/byLocation")
-    public ResponseEntity<List<EventResponseDTO>> getEventsByLocation(@RequestParam String location) {
-        List<Event> events = eventService.getEventsByLocation(location);
-        List<EventResponseDTO> response = events.stream()
+    public ResponseEntity<Map<String, Object>> getEventsByLocationPaged(
+            @RequestParam String location,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Event> eventsPage = eventService.getEventsByLocation(location, pageable);
+
+        List<EventResponseDTO> events = eventsPage.getContent().stream()
                 .map(EventMapper::toResponseDTO)
                 .collect(Collectors.toList());
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("content", events);
+        response.put("totalElements", eventsPage.getTotalElements());
+
         return ResponseEntity.ok(response);
     }
+
+
 }

@@ -21,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.http.HttpStatus;
+import com.dipartimento.eventservice.security.util.JwtUtil;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -74,8 +75,6 @@ public class EventService {
     }
 
 
-
-
     public void createEvent(Event event, String token) {
         logger.info("Richiesta creazione evento da parte dell'utente con token: {}", token);
 
@@ -95,7 +94,6 @@ public class EventService {
     }
 
 
-
     public List<Event> getAllEvents() {
         return eventRepository.findAll();
     }
@@ -103,6 +101,7 @@ public class EventService {
     public Optional<Event> getEventById(Long id) {
         return eventRepository.findById(id);
     }
+
 
 
 
@@ -117,18 +116,29 @@ public class EventService {
 
         Event event = eventOpt.get();
 
-        if (!checkOrganizerExists(event.getOrganizerId(), token)) {
-            logger.warn("Utente non autorizzato ad eliminare l'evento ID={}", id);
-            throw new IllegalArgumentException("Non sei autorizzato a eliminare l'evento.");
+        // Log evento e organizerId
+        logger.info("Evento trovato: ID={}, OrganizerId={}", event.getId(), event.getOrganizerId());
+
+        // Usa metodo statico della classe JwtUtil per estrarre userId dal token
+        Long userIdFromToken;
+        try {
+            userIdFromToken = JwtUtil.extractUserId(token);
+            logger.info("UserId estratto dal token: {}", userIdFromToken);
+        } catch (Exception e) {
+            logger.error("Errore estrazione userId dal token: {}", e.getMessage());
+            throw new IllegalArgumentException("Token non valido o userId non trovato.");
+        }
+
+        // Verifica che l'utente sia il creatore dell'evento
+        if (!event.getOrganizerId().equals(userIdFromToken)) {
+            logger.warn("Tentativo non autorizzato di eliminazione evento ID={} da parte di utente ID={}", id, userIdFromToken);
+            throw new IllegalArgumentException("Non sei autorizzato ad eliminare questo evento.");
         }
 
         eventRepository.delete(event);
         logger.info("Evento eliminato con successo: ID={}", id);
         return true;
     }
-
-
-
 
 
 
@@ -153,15 +163,16 @@ public class EventService {
     }
 
 
-    public List<Event> getEventsByName(String name){
-        return eventRepository.findByNameContainingIgnoreCase(name);
+
+    public Page<Event> getEventsByName(String name, Pageable pageable) {
+        return eventRepository.findByNameContainingIgnoreCase(name, pageable);
     }
 
-    public List<Event> getEventsByLocation(String location){
-        return eventRepository.findByLocationContainingIgnoreCase(location);
+    public Page<Event> getEventsByLocation(String location, Pageable pageable) {
+        return eventRepository.findByLocationContainingIgnoreCase(location, pageable);
     }
 
-    public Page<Event> getEventsPaginated(Pageable pageable){
+    public Page<Event> getEventsPaginated(Pageable pageable) {
         return eventRepository.findAll(pageable);
     }
 

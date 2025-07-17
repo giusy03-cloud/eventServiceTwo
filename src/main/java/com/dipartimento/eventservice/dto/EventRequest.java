@@ -3,9 +3,11 @@ package com.dipartimento.eventservice.dto;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import com.dipartimento.eventservice.validation.ValidDateRange;
 import jakarta.validation.constraints.*;
 import java.time.LocalDateTime;
 
+@ValidDateRange
 public class EventRequest {
 
     @NotBlank(message = "Il nome è obbligatorio")

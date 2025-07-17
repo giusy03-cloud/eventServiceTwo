@@ -32,4 +32,19 @@ public class JwtUtil {
         return (String) Jwts.parserBuilder().setSigningKey(key).build()
                 .parseClaimsJws(token).getBody().get("role");
     }
+
+    public static Long extractUserId(String token) {
+        Object idClaim = Jwts.parserBuilder().setSigningKey(key).build()
+                .parseClaimsJws(token).getBody().get("userId");
+        if (idClaim instanceof Integer) {
+            return ((Integer) idClaim).longValue();
+        } else if (idClaim instanceof Long) {
+            return (Long) idClaim;
+        } else if (idClaim instanceof String) {
+            return Long.valueOf((String) idClaim);
+        } else {
+            throw new IllegalArgumentException("ID utente non valido nel token");
+        }
+    }
+
 }
