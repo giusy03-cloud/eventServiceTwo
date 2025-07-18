@@ -3,6 +3,7 @@ package com.dipartimento.eventservice.controller;
 import com.dipartimento.eventservice.domain.Event;
 import com.dipartimento.eventservice.dto.EventRequest;
 import com.dipartimento.eventservice.dto.EventResponseDTO;
+import com.dipartimento.eventservice.dto.PaginatedEventResponse;
 import com.dipartimento.eventservice.dto.ResponseMessage;
 import com.dipartimento.eventservice.mapper.EventMapper;
 import com.dipartimento.eventservice.service.EventService;
@@ -58,20 +59,22 @@ public class EventController {
 
 
 
+
     @GetMapping("/paged")
-    public ResponseEntity<List<EventResponseDTO>> getPaginatedEvents(
+    public ResponseEntity<PaginatedEventResponse> getPaginatedEvents(
             @RequestParam(defaultValue ="0") int page,
             @RequestParam(defaultValue = "10") int size
     ){
-        Pageable pageable = PageRequest.of(page,size);
-        Page<Event> eventsPage=eventService.getEventsPaginated(pageable);
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Event> eventsPage = eventService.getEventsPaginated(pageable);
 
-        List<EventResponseDTO> response=eventsPage.getContent().stream()
+        List<EventResponseDTO> response = eventsPage.getContent().stream()
                 .map(EventMapper::toResponseDTO)
                 .collect(Collectors.toList());
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(new PaginatedEventResponse(response, eventsPage.getTotalElements()));
     }
+
 
     // READ ALL
     @GetMapping("/all")
@@ -179,10 +182,8 @@ public class EventController {
 
 
 
-
-    // SEARCH BY NAME
     @GetMapping("/search/byName")
-    public ResponseEntity<List<EventResponseDTO>> getEventsByName(
+    public ResponseEntity<PaginatedEventResponse> getEventsByName(
             @RequestParam String name,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
@@ -193,12 +194,13 @@ public class EventController {
         List<EventResponseDTO> response = events.getContent().stream()
                 .map(EventMapper::toResponseDTO)
                 .collect(Collectors.toList());
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(new PaginatedEventResponse(response, events.getTotalElements()));
     }
     // SEARCH BY LOCATION
 
+
     @GetMapping("/search/byLocation")
-    public ResponseEntity<List<EventResponseDTO>> getEventsByLocation(
+    public ResponseEntity<PaginatedEventResponse> getEventsByLocation(
             @RequestParam String location,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
@@ -209,6 +211,6 @@ public class EventController {
         List<EventResponseDTO> response = events.getContent().stream()
                 .map(EventMapper::toResponseDTO)
                 .collect(Collectors.toList());
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(new PaginatedEventResponse(response, events.getTotalElements()));
     }
 }
