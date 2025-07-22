@@ -213,4 +213,21 @@ public class EventController {
                 .collect(Collectors.toList());
         return ResponseEntity.ok(new PaginatedEventResponse(response, events.getTotalElements()));
     }
+
+    @PostMapping("/byIds")
+    @PreAuthorize("hasRole('PARTICIPANT') or hasRole('ORGANIZER')")
+    public ResponseEntity<List<EventResponseDTO>> getEventsByIds(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @RequestBody List<Long> ids) {
+
+        // Assumi che eventService abbia un metodo per recuperare eventi per lista ID
+        List<Event> events = eventService.getEventsByIds(ids);
+
+        List<EventResponseDTO> response = events.stream()
+                .map(EventMapper::toResponseDTO)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(response);
+    }
+
 }

@@ -175,6 +175,10 @@ public class EventService {
     public Page<Event> getEventsPaginated(Pageable pageable) {
         return eventRepository.findAll(pageable);
     }
+    public List<Event> getEventsByIds(List<Long> ids) {
+        return eventRepository.findAllById(ids);
+    }
+
 
 
 }
