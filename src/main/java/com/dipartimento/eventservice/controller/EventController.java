@@ -188,6 +188,9 @@ public class EventController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
+        if (name == null || name.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(new PaginatedEventResponse(List.of(), 0));
+        }
         Pageable pageable = PageRequest.of(page, size);
         Page<Event> events = eventService.getEventsByName(name, pageable);
 
@@ -205,6 +208,9 @@ public class EventController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
+        if (location == null || location.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(new PaginatedEventResponse(List.of(), 0));
+        }
         Pageable pageable = PageRequest.of(page, size);
         Page<Event> events = eventService.getEventsByLocation(location, pageable);
 
