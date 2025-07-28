@@ -1,10 +1,7 @@
 package com.dipartimento.eventservice.controller;
 
 import com.dipartimento.eventservice.domain.Event;
-import com.dipartimento.eventservice.dto.EventRequest;
-import com.dipartimento.eventservice.dto.EventResponseDTO;
-import com.dipartimento.eventservice.dto.PaginatedEventResponse;
-import com.dipartimento.eventservice.dto.ResponseMessage;
+import com.dipartimento.eventservice.dto.*;
 import com.dipartimento.eventservice.mapper.EventMapper;
 import com.dipartimento.eventservice.service.EventService;
 
@@ -97,15 +94,18 @@ public class EventController {
     }
 
     // Endpoint pubblico per controllo esistenza evento da altri microservizi
+
     @GetMapping("/public/{id}")
-    public ResponseEntity<String> publicCheckEventExists(@PathVariable Long id) {
+    public ResponseEntity<EventResponseDTO> getPublicEventById(@PathVariable Long id) {
         Optional<Event> event = eventService.getEventById(id);
         if (event.isPresent()) {
-            return ResponseEntity.ok("Esiste");
+            return ResponseEntity.ok(EventMapper.toResponseDTO(event.get()));
         } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Evento non trovato");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
+
+
 
 
 
@@ -235,5 +235,15 @@ public class EventController {
 
         return ResponseEntity.ok(response);
     }
+    @GetMapping("/public/details/{id}")
+    public ResponseEntity<EventResponseDTO> getEventDetailsPublic(@PathVariable Long id) {
+        Optional<Event> event = eventService.getEventById(id);
+        if (event.isPresent()) {
+            return ResponseEntity.ok(EventMapper.toResponseDTO(event.get()));
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
 
 }

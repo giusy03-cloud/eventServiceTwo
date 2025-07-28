@@ -32,6 +32,7 @@ public class SecurityConfig {
                         .requestMatchers("/events/search/**").authenticated()
 
                         .requestMatchers("/events/create", "/events/update/**", "/events/delete/**").hasRole("ORGANIZER")
+                        .requestMatchers("/events/public/details/{id}").hasRole("PARTICIPANT")
                         .anyRequest().authenticated()
                 )
 
