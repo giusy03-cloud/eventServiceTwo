@@ -25,12 +25,17 @@ public class SecurityConfig {
         http
                 .cors(withDefaults())
                 .csrf(csrf -> csrf.disable())
+
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/events/paged", "/events/{id}", "/events/all","events/public/{id}").permitAll() // questi restano pubblici
+                        .requestMatchers(
+                                "/events/paged",
+                                "/events/{id}",
+                                "/events/all",
+                                "/events/public/{id}",
+                                "/events/public/byIds"        // <-- qui aggiungi il nuovo endpoint pubblico
+                        ).permitAll()
 
-                        // RICHIEDE AUTENTICAZIONE per tutti gli endpoint di ricerca
                         .requestMatchers("/events/search/**").authenticated()
-
                         .requestMatchers("/events/create", "/events/update/**", "/events/delete/**").hasRole("ORGANIZER")
                         .requestMatchers("/events/public/details/{id}").hasRole("PARTICIPANT")
                         .anyRequest().authenticated()

@@ -245,5 +245,14 @@ public class EventController {
         }
     }
 
+    @PostMapping("/public/byIds")
+    public ResponseEntity<List<EventResponseDTO>> getEventsByIdsPublic(@RequestBody List<Long> ids) {
+        List<Event> events = eventService.getEventsByIds(ids);
+        List<EventResponseDTO> response = events.stream()
+                .map(EventMapper::toResponseDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(response);
+    }
+
 
 }
