@@ -40,6 +40,16 @@ public class EventRequest {
     private String status; // oppure meglio usare enum EventStatus se possibile
 
 
+    @Size(max = 1000, message = "L'URL dell'immagine non può superare 1000 caratteri")
+    private String imageUrl;
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
 
     public String getName() {
         return name;

@@ -18,6 +18,8 @@ public class EventMapper {
         event.setPrice(request.getPrice());
         event.setCapacity(request.getCapacity());
         event.setStatus(EventStatus.valueOf(request.getStatus()));
+        event.setImageUrl(request.getImageUrl());
+
         return event;
     }
 
@@ -36,7 +38,8 @@ public class EventMapper {
                 event.getCreatedAt(),  // ➕ aggiunto
                 event.getCreatedBy(),
                 event.getUpdatedAt(),
-                event.getUpdatedBy()
+                event.getUpdatedBy(),
+                event.getImageUrl()
         );
     }
 
