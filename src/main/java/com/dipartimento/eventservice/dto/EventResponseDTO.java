@@ -17,6 +17,8 @@ public class EventResponseDTO {
     private Double price;
     private Integer capacity;
     private EventStatus status;
+    private String imageUrl;
+
 
     // 🔽 Campi di audit logging
     private LocalDateTime createdAt;
@@ -28,7 +30,7 @@ public class EventResponseDTO {
     // Costruttore completo (aggiungilo o aggiornalo)
     public EventResponseDTO(Long id, String name, String description, LocalDateTime startDate, LocalDateTime endDate,
                             String location, Long organizerId, Double price, Integer capacity, EventStatus status,
-                            LocalDateTime createdAt, Long createdBy, LocalDateTime updatedAt, Long updatedBy) {
+                            LocalDateTime createdAt, Long createdBy, LocalDateTime updatedAt, Long updatedBy,String imageUrl) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -43,6 +45,7 @@ public class EventResponseDTO {
         this.createdBy = createdBy;
         this.updatedAt = updatedAt;
         this.updatedBy = updatedBy;
+        this.imageUrl = imageUrl;
     }
 
     // Getter e Setter
@@ -156,5 +159,13 @@ public class EventResponseDTO {
 
     public void setUpdatedBy(Long updatedBy) {
         this.updatedBy = updatedBy;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 }

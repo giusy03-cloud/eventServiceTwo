@@ -14,6 +14,7 @@ public class EventResponse {
     private Double price;
     private Integer capacity;
     private String status;
+    private String imageUrl;
 
     public Long getId() {
         return id;
@@ -29,6 +30,13 @@ public class EventResponse {
 
     public void setName(String name) {
         this.name = name;
+    }
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
     public String getDescription() {
