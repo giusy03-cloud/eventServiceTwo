@@ -10,14 +10,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import java.time.ZonedDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.util.UUID;
+import java.util.Optional;
 
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
@@ -253,6 +261,42 @@ public class EventController {
                 .collect(Collectors.toList());
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping(value = "/{id}/export", produces = "text/calendar")
+    public ResponseEntity<String> exportEvent(@PathVariable Long id) {
+        Optional<Event> eventOpt = eventService.getEventById(id);
+        if (eventOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        Event event = eventOpt.get();
+
+        DateTimeFormatter icalFormatter = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss'Z'");
+
+        // Converti LocalDateTime a UTC per esportazione corretta
+        ZonedDateTime startUtc = event.getStartDate().atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneOffset.UTC);
+        ZonedDateTime endUtc = event.getEndDate().atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneOffset.UTC);
+        ZonedDateTime nowUtc = ZonedDateTime.now(ZoneOffset.UTC);
+
+        String icsContent = "BEGIN:VCALENDAR\n" +
+                "VERSION:2.0\n" +
+                "BEGIN:VEVENT\n" +
+                "UID:" + UUID.randomUUID() + "\n" +
+                "DTSTAMP:" + nowUtc.format(icalFormatter) + "\n" +
+                "DTSTART:" + startUtc.format(icalFormatter) + "\n" +
+                "DTEND:" + endUtc.format(icalFormatter) + "\n" +
+                "SUMMARY:" + event.getName() + "\n" +
+                "DESCRIPTION:" + event.getDescription() + "\n" +
+                "LOCATION:" + event.getLocation() + "\n" +
+                "END:VEVENT\n" +
+                "END:VCALENDAR";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.parseMediaType("text/calendar"));
+        headers.setContentDisposition(ContentDisposition.builder("attachment").filename("evento.ics").build());
+
+        return new ResponseEntity<>(icsContent, headers, HttpStatus.OK);
+    }
+
 
 
 }
