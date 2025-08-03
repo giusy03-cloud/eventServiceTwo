@@ -164,17 +164,25 @@ public class EventService {
 
 
 
+
     public Page<Event> getEventsByName(String name, Pageable pageable) {
-        return eventRepository.findByNameContainingIgnoreCase(name, pageable);
+        LocalDateTime todayMidnight = LocalDateTime.now().toLocalDate().atStartOfDay();
+        return eventRepository.findByNameContainingIgnoreCaseAndStartDateAfter(name, todayMidnight, pageable);
     }
+
 
     public Page<Event> getEventsByLocation(String location, Pageable pageable) {
-        return eventRepository.findByLocationContainingIgnoreCase(location, pageable);
+        LocalDateTime todayMidnight = LocalDateTime.now().toLocalDate().atStartOfDay();
+        return eventRepository.findByLocationContainingIgnoreCaseAndStartDateAfter(location, todayMidnight, pageable);
     }
 
+
+
     public Page<Event> getEventsPaginated(Pageable pageable) {
-        return eventRepository.findAll(pageable);
+        LocalDateTime todayMidnight = LocalDateTime.now().toLocalDate().atStartOfDay();
+        return eventRepository.findByStartDateAfter(todayMidnight, pageable);
     }
+
     public List<Event> getEventsByIds(List<Long> ids) {
         return eventRepository.findAllById(ids);
     }

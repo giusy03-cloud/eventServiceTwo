@@ -32,7 +32,7 @@ public class SecurityConfig {
                                 "/events/{id}",
                                 "/events/all",
                                 "/events/public/{id}",
-                                "/events/public/byIds"        // <-- qui aggiungi il nuovo endpoint pubblico
+                                "/events/public/byIds","/events/test-delete-past"    // <-- qui aggiungi il nuovo endpoint pubblico
                         ).permitAll()
 
                         .requestMatchers("/events/search/**").authenticated()

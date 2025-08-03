@@ -3,6 +3,7 @@ package com.dipartimento.eventservice.controller;
 import com.dipartimento.eventservice.domain.Event;
 import com.dipartimento.eventservice.dto.*;
 import com.dipartimento.eventservice.mapper.EventMapper;
+import com.dipartimento.eventservice.repository.EventRepository;
 import com.dipartimento.eventservice.service.EventService;
 
 import jakarta.validation.Valid;
@@ -14,9 +15,8 @@ import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import java.time.ZonedDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
+
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 import java.util.Optional;
@@ -34,6 +34,9 @@ public class EventController {
 
     @Autowired
     private EventService eventService;
+
+    @Autowired
+    private EventRepository eventRepository;
 
     @PostMapping("/create")
     @PreAuthorize("hasRole('ORGANIZER')")
@@ -112,6 +115,14 @@ public class EventController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
+
+    @GetMapping("/test-delete-past")
+    public ResponseEntity<String> testDeletePastEvents() {
+        LocalDateTime todayStart = LocalDate.now().atStartOfDay();
+        eventRepository.deleteByStartDateBefore(todayStart);
+        return ResponseEntity.ok("Eventi passati eliminati fino a: " + todayStart);
+    }
+
 
 
 
