@@ -116,12 +116,27 @@ public class EventController {
         }
     }
 
+
+
     @GetMapping("/test-delete-past")
     public ResponseEntity<String> testDeletePastEvents() {
-        LocalDateTime todayStart = LocalDate.now().atStartOfDay();
-        eventRepository.deleteByStartDateBefore(todayStart);
-        return ResponseEntity.ok("Eventi passati eliminati fino a: " + todayStart);
+        LocalDateTime tomorrowMidnight = LocalDate.now().plusDays(1).atStartOfDay();
+        eventRepository.deleteByStartDateBefore(tomorrowMidnight);
+        return ResponseEntity.ok("Eventi eliminati fino a: " + tomorrowMidnight);
     }
+
+    @GetMapping("/test-delete-tomorrow-events")
+    public ResponseEntity<String> testDeleteTomorrowEvents() {
+        LocalDateTime tomorrowStart = LocalDate.now().plusDays(1).atStartOfDay();
+        LocalDateTime dayAfterTomorrowStart = LocalDate.now().plusDays(2).atStartOfDay();
+
+        eventRepository.deleteByStartDateBetween(tomorrowStart, dayAfterTomorrowStart);
+
+        return ResponseEntity.ok("Eventi del " + tomorrowStart.toLocalDate() + " eliminati manualmente.");
+    }
+
+
+
 
 
 

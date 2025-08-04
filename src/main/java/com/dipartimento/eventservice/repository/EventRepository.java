@@ -38,5 +38,10 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     @Query("DELETE FROM Event e WHERE e.startDate < :dateTime")
     void deleteByStartDateBefore(LocalDateTime dateTime);
 
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM Event e WHERE e.startDate >= :from AND e.startDate < :to")
+    void deleteByStartDateBetween(LocalDateTime from, LocalDateTime to);
+
 
 }
