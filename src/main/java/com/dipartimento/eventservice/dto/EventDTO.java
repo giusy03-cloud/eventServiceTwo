@@ -16,6 +16,16 @@ public class EventDTO {
     private EventStatus status;
     private Long organizerId;
     private String imageUrl; // <-- aggiunto
+    private boolean archived;
+
+    public boolean isArchived() {
+        return archived;
+    }
+
+    public void setArchived(boolean archived) {
+        this.archived = archived;
+    }
+
 
     public String getImageUrl() {
         return imageUrl;

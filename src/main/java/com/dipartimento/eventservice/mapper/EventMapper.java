@@ -20,6 +20,7 @@ public class EventMapper {
         event.setStatus(EventStatus.valueOf(request.getStatus()));
         event.setImageUrl(request.getImageUrl());
 
+
         return event;
     }
 
@@ -39,7 +40,8 @@ public class EventMapper {
                 event.getCreatedBy(),
                 event.getUpdatedAt(),
                 event.getUpdatedBy(),
-                event.getImageUrl()
+                event.getImageUrl(),
+                event.isArchived()  // aggiunto
         );
     }
 

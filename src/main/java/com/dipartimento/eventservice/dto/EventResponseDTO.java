@@ -25,12 +25,14 @@ public class EventResponseDTO {
     private Long createdBy;
     private LocalDateTime updatedAt;
     private Long updatedBy;
+    private Boolean archived;
+
 
 
     // Costruttore completo (aggiungilo o aggiornalo)
     public EventResponseDTO(Long id, String name, String description, LocalDateTime startDate, LocalDateTime endDate,
                             String location, Long organizerId, Double price, Integer capacity, EventStatus status,
-                            LocalDateTime createdAt, Long createdBy, LocalDateTime updatedAt, Long updatedBy,String imageUrl) {
+                            LocalDateTime createdAt, Long createdBy, LocalDateTime updatedAt, Long updatedBy,String imageUrl,Boolean archived) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -46,7 +48,18 @@ public class EventResponseDTO {
         this.updatedAt = updatedAt;
         this.updatedBy = updatedBy;
         this.imageUrl = imageUrl;
+        this.archived = archived;
     }
+
+    // Getter e setter per archived
+    public Boolean getArchived() {
+        return archived;
+    }
+
+    public void setArchived(Boolean archived) {
+        this.archived = archived;
+    }
+
 
     // Getter e Setter
     public Long getId() {

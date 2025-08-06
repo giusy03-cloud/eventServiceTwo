@@ -42,6 +42,18 @@ public class EventRequest {
 
     @Size(max = 1000, message = "L'URL dell'immagine non può superare 1000 caratteri")
     private String imageUrl;
+    // Aggiungi il campo
+    private Boolean archived;
+
+    // Getter e setter
+    public Boolean getArchived() {
+        return archived;
+    }
+
+    public void setArchived(Boolean archived) {
+        this.archived = archived;
+    }
+
 
     public String getImageUrl() {
         return imageUrl;

@@ -15,6 +15,18 @@ public class EventResponse {
     private Integer capacity;
     private String status;
     private String imageUrl;
+    // Aggiungi il campo
+    private Boolean archived;
+
+    // Getter e setter
+    public Boolean getArchived() {
+        return archived;
+    }
+
+    public void setArchived(Boolean archived) {
+        this.archived = archived;
+    }
+
 
     public Long getId() {
         return id;
