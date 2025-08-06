@@ -3,6 +3,7 @@ package com.dipartimento.eventservice.security;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -26,18 +27,13 @@ public class SecurityConfig {
                 .cors(withDefaults())
                 .csrf(csrf -> csrf.disable())
 
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/events/paged",
-                                "/events/{id}",
-                                "/events/all",
-                                "/events/public/{id}",
-                                "/events/public/byIds","/events/test-delete-past"    // <-- qui aggiungi il nuovo endpoint pubblico
-                        ).permitAll()
 
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.GET, "/events/paged", "/events/public/{id}", "/events/public/details/{id}").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/events/public/byIds").permitAll()
                         .requestMatchers("/events/search/**").authenticated()
                         .requestMatchers("/events/create", "/events/update/**", "/events/delete/**").hasRole("ORGANIZER")
-                        .requestMatchers("/events/public/details/{id}").hasRole("PARTICIPANT")
+                        .requestMatchers("/events/all").hasAnyRole("ORGANIZER", "PARTICIPANT")
                         .anyRequest().authenticated()
                 )
 
