@@ -2,11 +2,18 @@ package com.dipartimento.eventservice.service;
 
 import com.dipartimento.eventservice.repository.EventRepository;
 import jakarta.annotation.PostConstruct;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class EventCleanupService {
@@ -18,26 +25,40 @@ public class EventCleanupService {
     }
 
 
+    /*
+    @Scheduled(cron = "0 59 23 * * ?")
+    @Transactional
+    public void archiveEventsStartingTomorrow() {
+        LocalDateTime start = LocalDate.now().plusDays(1).atStartOfDay();
+        LocalDateTime end = start.plusDays(1); // Giorno dopo
 
-    @Scheduled(cron = "0 59 23 * * ?") // ogni giorno alle 23:59
-// ogni minuto
-// ogni giorno alle 23:59
-    public void deleteEventsStartingTomorrow() {
-        LocalDateTime tomorrowStart = LocalDate.now().plusDays(1).atStartOfDay();       // 2025-08-05T00:00
-        LocalDateTime dayAfterTomorrowStart = LocalDate.now().plusDays(2).atStartOfDay(); // 2025-08-06T00:00
-
-        eventRepository.deleteByStartDateBetween(tomorrowStart, dayAfterTomorrowStart);
-
-        System.out.println("Eventi del giorno " + tomorrowStart.toLocalDate() + " eliminati alle 23:59");
+        eventRepository.archiveEventsBetween(start, end);
+        System.out.println("✅ Eventi archiviati: " + start.toLocalDate());
     }
 
-    // ✅ Cleanup all'avvio dell'app
-    @PostConstruct
-    public void cleanEventsOnStartup() {
-        LocalDateTime todayMidnight = LocalDate.now().atStartOfDay().plusDays(1); // 00:00 del giorno dopo
-        eventRepository.deleteByStartDateBefore(todayMidnight);
-        System.out.println("Cleanup eseguito all'avvio per eventi con startDate prima di: " + todayMidnight);
+     */
+
+
+    @Transactional
+    public void archiveOldEvents() {
+        LocalDateTime midnightTomorrow = LocalDate.now().plusDays(1).atStartOfDay();
+        int updatedCount = eventRepository.archiveEventsBetween(midnightTomorrow);
+        System.out.println("✅ Archiviati eventi prima di " + midnightTomorrow + ": " + updatedCount);
     }
+
+
+
+    @Scheduled(fixedRate = 10000) // ogni 10 secondi
+    @Transactional
+    public void archiveOldEventsScheduled() {
+        LocalDateTime now = LocalDate.now().plusDays(1).atStartOfDay();
+        int updatedCount = eventRepository.archiveEventsBefore(now);
+        System.out.println("✅ Archiviati eventi fino a " + now + ": " + updatedCount);
+    }
+
+
+
+
 
 
 

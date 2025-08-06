@@ -187,6 +187,21 @@ public class EventService {
         return eventRepository.findAllById(ids);
     }
 
+    public List<Event> getArchivedEvents() {
+        return eventRepository.findByArchivedTrue();
+    }
+
+    public List<Event> getFutureEvents() {
+        LocalDateTime now = LocalDateTime.now();
+        return eventRepository.findByArchivedFalseAndStartDateAfter(now);
+    }
+
+    public Page<Event> getFutureEvents(Pageable pageable) {
+        LocalDateTime now = LocalDateTime.now();
+        return eventRepository.findByArchivedFalseAndStartDateAfter(now, pageable);
+    }
+
+
 
 
 }

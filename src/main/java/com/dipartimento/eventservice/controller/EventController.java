@@ -4,6 +4,7 @@ import com.dipartimento.eventservice.domain.Event;
 import com.dipartimento.eventservice.dto.*;
 import com.dipartimento.eventservice.mapper.EventMapper;
 import com.dipartimento.eventservice.repository.EventRepository;
+import com.dipartimento.eventservice.service.EventCleanupService;
 import com.dipartimento.eventservice.service.EventService;
 
 import jakarta.validation.Valid;
@@ -37,6 +38,10 @@ public class EventController {
 
     @Autowired
     private EventRepository eventRepository;
+
+    @Autowired
+    private EventCleanupService eventCleanupService;
+
 
     @PostMapping("/create")
     @PreAuthorize("hasRole('ORGANIZER')")
@@ -106,11 +111,25 @@ public class EventController {
 
     // Endpoint pubblico per controllo esistenza evento da altri microservizi
 
+
     @GetMapping("/public/{id}")
-    public ResponseEntity<EventResponseDTO> getPublicEventById(@PathVariable Long id) {
-        Optional<Event> event = eventService.getEventById(id);
+    public ResponseEntity<?> getPublicEvent(@PathVariable Long id) {
+        Optional<Event> event = eventRepository.findByIdAndArchivedFalse(id);
+
         if (event.isPresent()) {
-            return ResponseEntity.ok(EventMapper.toResponseDTO(event.get()));
+            return ResponseEntity.ok(event.get());
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Evento non trovato o archiviato");
+        }
+    }
+
+    // Endpoint interno accessibile solo dal ReviewService
+    @GetMapping("/internal/{id}")
+    public ResponseEntity<Event> getEventEvenIfArchived(@PathVariable Long id) {
+        Optional<Event> event = eventRepository.findById(id);
+
+        if (event.isPresent()) {
+            return ResponseEntity.ok(event.get());
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
@@ -118,11 +137,11 @@ public class EventController {
 
 
 
-
-
-
-
-
+    @GetMapping("/archiveNow")
+    public ResponseEntity<String> archiveNow() {
+        eventCleanupService.archiveOldEvents();
+        return ResponseEntity.ok("Archiviazione eventi passati eseguita");
+    }
 
 
 
@@ -304,6 +323,29 @@ public class EventController {
         headers.setContentDisposition(ContentDisposition.builder("attachment").filename("evento.ics").build());
 
         return new ResponseEntity<>(icsContent, headers, HttpStatus.OK);
+    }
+
+    @GetMapping("/archived")
+    @PreAuthorize("hasRole('ORGANIZER') or hasRole('PARTICIPANT')")
+    public ResponseEntity<List<EventResponseDTO>> getArchivedEvents() {
+        List<Event> archivedEvents = eventService.getArchivedEvents();
+        List<EventResponseDTO> response = archivedEvents.stream()
+                .map(EventMapper::toResponseDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(response);
+    }
+
+
+    @GetMapping("/future")
+    @PreAuthorize("hasRole('PARTICIPANT') or hasRole('ORGANIZER')")
+    public List<Event> getFutureEvents() {
+        return eventService.getFutureEvents();
+    }
+
+    @GetMapping("/future/paginated")
+    @PreAuthorize("hasRole('PARTICIPANT') or hasRole('ORGANIZER')")
+    public Page<Event> getFutureEventsPaginated(Pageable pageable) {
+        return eventService.getFutureEvents(pageable);
     }
 
 

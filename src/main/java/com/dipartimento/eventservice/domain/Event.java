@@ -43,6 +43,9 @@ public class Event {
     @Column(name = "capacity")
     private Integer capacity;  // Capacità massima di partecipanti
 
+    @Column(nullable = false)
+    private boolean archived = false;
+
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
@@ -184,5 +187,13 @@ public class Event {
 
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
+    }
+
+    public boolean isArchived() {
+        return archived;
+    }
+
+    public void setArchived(boolean archived) {
+        this.archived = archived;
     }
 }
