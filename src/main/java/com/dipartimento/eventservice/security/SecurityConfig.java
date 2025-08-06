@@ -28,14 +28,16 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
 
 
+
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.GET, "/events/paged", "/events/public/{id}", "/events/public/details/{id}").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/events/paged", "/events/public/**", "/events/public/details/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/events/public/byIds").permitAll()
                         .requestMatchers("/events/search/**").authenticated()
                         .requestMatchers("/events/create", "/events/update/**", "/events/delete/**").hasRole("ORGANIZER")
                         .requestMatchers("/events/all").hasAnyRole("ORGANIZER", "PARTICIPANT")
                         .anyRequest().authenticated()
                 )
+
 
 
 
