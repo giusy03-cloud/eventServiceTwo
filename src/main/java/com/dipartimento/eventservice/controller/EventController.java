@@ -343,7 +343,7 @@ public class EventController {
     }
 
     @GetMapping("/future/paginated")
-    @PreAuthorize("hasRole('PARTICIPANT') or hasRole('ORGANIZER')")
+    //@PreAuthorize("hasRole('PARTICIPANT') or hasRole('ORGANIZER')")
     public Page<Event> getFutureEventsPaginated(Pageable pageable) {
         return eventService.getFutureEvents(pageable);
     }

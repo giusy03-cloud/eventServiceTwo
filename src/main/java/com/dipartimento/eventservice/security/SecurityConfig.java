@@ -26,13 +26,15 @@ public class SecurityConfig {
         http
                 .cors(withDefaults())
                 .csrf(csrf -> csrf.disable())
-
-
-
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.GET, "/events/paged", "/events/public/**", "/events/public/details/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/events/public/byIds").permitAll()
+                        .requestMatchers(HttpMethod.GET,
+                                "/events/paged",
+                                "/events/public/**",
+                                "/events/public/details/**",
+                                "/events/future/paginated", "/events/details/**" // <--- aggiunto qui
+                        ).permitAll()
 
+                        .requestMatchers(HttpMethod.POST, "/events/public/byIds").permitAll()
                         .requestMatchers(HttpMethod.GET, "/events/internal/**").permitAll()
 
                         .requestMatchers("/events/search/**").authenticated()
@@ -40,19 +42,16 @@ public class SecurityConfig {
                         .requestMatchers("/events/all").hasAnyRole("ORGANIZER", "PARTICIPANT")
                         .anyRequest().authenticated()
                 )
-
-
-
-
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:4200")); // ✅ ORIGINE DEL FRONTEND
+        configuration.setAllowedOrigins(List.of("http://localhost:4200","http://192.168.0.107:4200")); // ✅ ORIGINE DEL FRONTEND
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true); // ✅ NECESSARIO SE USI Authorization o Cookie
