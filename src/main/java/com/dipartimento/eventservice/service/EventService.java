@@ -201,6 +201,10 @@ public class EventService {
         return eventRepository.findByArchivedFalseAndStartDateAfter(now, pageable);
     }
 
+    public List<Event> getEventsByIdsIncludingArchived(List<Long> ids) {
+        return eventRepository.findAllById(ids); // NON filtrare per archived
+    }
+
 
 
 

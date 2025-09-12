@@ -256,14 +256,14 @@ public class EventController {
         return ResponseEntity.ok(new PaginatedEventResponse(response, events.getTotalElements()));
     }
 
+
     @PostMapping("/byIds")
     @PreAuthorize("hasRole('PARTICIPANT') or hasRole('ORGANIZER')")
     public ResponseEntity<List<EventResponseDTO>> getEventsByIds(
             @RequestHeader("Authorization") String authorizationHeader,
             @RequestBody List<Long> ids) {
 
-        // Assumi che eventService abbia un metodo per recuperare eventi per lista ID
-        List<Event> events = eventService.getEventsByIds(ids);
+        List<Event> events = eventService.getEventsByIdsIncludingArchived(ids); // nuovo metodo
 
         List<EventResponseDTO> response = events.stream()
                 .map(EventMapper::toResponseDTO)
@@ -271,6 +271,7 @@ public class EventController {
 
         return ResponseEntity.ok(response);
     }
+
     @GetMapping("/public/details/{id}")
     public ResponseEntity<EventResponseDTO> getEventDetailsPublic(@PathVariable Long id) {
         Optional<Event> event = eventService.getEventById(id);

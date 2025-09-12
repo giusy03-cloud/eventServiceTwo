@@ -3,35 +3,15 @@ services:
     build:
       context: .
     ports:
-      - "8081:8080"
-    depends_on:
-      - event-db
+      - "8081:8081"
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://event-db:5432/eventService
-      - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=root
-      - SPRING_SECURITY_USER_NAME=admin
-      - SPRING_SECURITY_USER_PASSWORD=admin
-    networks:
-      - event-net
-
-  event-db:
-    image: postgres:15
-    container_name: eventservice-db
-    environment:
-      POSTGRES_DB: eventService
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: root
-    ports:
-      - "5433:5432"
-    volumes:
-      - eventService-data:/var/lib/postgresql/data
-    networks:
-      - event-net
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://host.docker.internal:5433/eventService
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: root
+      SPRING_SECURITY_USER_NAME: admin
+      SPRING_SECURITY_USER_PASSWORD: admin
 
 networks:
   event-net:
     driver: bridge
-
-volumes:
-  eventService-data:
